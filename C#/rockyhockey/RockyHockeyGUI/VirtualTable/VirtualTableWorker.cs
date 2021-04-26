@@ -137,7 +137,7 @@ namespace RockyHockeyGUI.VirtualTable
         {
             var velocity = tableState.Velocity;
             var position = tableState.Position;
-
+            var batPos = tableState.BatPosition;
             if (velocity != Vector2.Zero)
             {
                 // Try to get puck unstuck if it was placed inside a wall
