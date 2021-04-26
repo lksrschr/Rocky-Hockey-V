@@ -159,6 +159,13 @@ namespace RockyHockeyGUI.VirtualTable
                     velocity.X *= -1;
                 }
 
+                // Bounce off Batposition
+                if ((Math.Abs(position.X - batPos.X) < 35) && (Math.Abs(position.Y - batPos.Y) < 35))
+                {
+                    velocity.Y *= -1;
+                    velocity.X *= -1;
+                }
+
                 // Bounce off the long sides
                 if (position.Y < puckRadius)
                 {
