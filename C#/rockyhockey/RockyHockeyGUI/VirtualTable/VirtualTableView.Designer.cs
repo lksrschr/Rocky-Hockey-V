@@ -6,7 +6,7 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
+        
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -49,6 +49,7 @@
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.yBatTextBox = new System.Windows.Forms.TextBox();
+            this.moveBatMode = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.trackBar)).BeginInit();
             this.SuspendLayout();
             // 
@@ -225,6 +226,17 @@
             this.yBatTextBox.Name = "yBatTextBox";
             this.yBatTextBox.Size = new System.Drawing.Size(88, 20);
             this.yBatTextBox.TabIndex = 0;
+            //
+            // activate move bat
+            //
+            this.moveBatMode.Enabled = false;
+            this.moveBatMode.Location = new System.Drawing.Point(900, 441);
+            this.moveBatMode.Name = "moveBatButton";
+            this.moveBatMode.Size = new System.Drawing.Size(75, 23);
+            this.moveBatMode.TabIndex = 3;
+            this.moveBatMode.Text = "MoveBat";
+            this.moveBatMode.UseVisualStyleBackColor = true;
+            this.moveBatMode.Click += new System.EventHandler(this.MoveBatClick);
             // 
             // VirtualTableView
             // 
@@ -252,6 +264,7 @@
             this.Controls.Add(this.y1TextBox);
             this.Controls.Add(this.x1TextBox);
             this.Controls.Add(this.x0TextBox);
+            this.Controls.Add(this.moveBatMode);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "VirtualTableView";
@@ -285,5 +298,6 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox yBatTextBox;
+        private System.Windows.Forms.Button moveBatMode;
     }
 }

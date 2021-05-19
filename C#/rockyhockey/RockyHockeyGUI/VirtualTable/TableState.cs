@@ -14,6 +14,7 @@ namespace RockyHockeyGUI.VirtualTable
         /// <c>Vector2.Zero</c> means the puck is stationary.
         /// </summary>
         internal Vector2 Velocity;
+        internal Vector2 VelocityBat;
 
         internal Vector2 BatPosition;
 
@@ -42,6 +43,18 @@ namespace RockyHockeyGUI.VirtualTable
                 if (value)
                 {
                     Velocity = Vector2.Zero;
+                }
+            }
+        }
+
+        internal bool IsBatStationary
+        {
+            get => VelocityBat == Vector2.Zero;
+            set
+            {
+                if (value)
+                {
+                    VelocityBat = Vector2.Zero;
                 }
             }
         }

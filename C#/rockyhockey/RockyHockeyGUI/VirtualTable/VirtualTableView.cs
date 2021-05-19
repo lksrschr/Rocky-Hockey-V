@@ -40,6 +40,7 @@ namespace RockyHockeyGUI.VirtualTable
 
         private bool isMouseHeld;
         private bool hasVelocityLine;
+        public bool moveBat;
 
         internal VirtualTableWorker Table { get; }
 
@@ -88,10 +89,12 @@ namespace RockyHockeyGUI.VirtualTable
             e.Graphics.FillEllipse(new SolidBrush(Color.MediumBlue), batPos.X - BatRadius, batPos.Y - BatRadius,
                 BatDiameter, BatDiameter);
 
+            //Draw the velocity vector of the puck
             if (hasVelocityLine)
             {
                 e.Graphics.DrawLine(new Pen(Color.Red, 3), puckPos.X, puckPos.Y, mouseHeldX, mouseHeldY);
             }
+
         }
 
         private void PanelMouseDown(object sender, MouseEventArgs e)
@@ -102,10 +105,15 @@ namespace RockyHockeyGUI.VirtualTable
             {
                 isStationary = state.IsPuckStationary;
 
-                if (isStationary)
+                if ((isStationary)&&(moveBatMode.Enabled==false)) // Move puck iif MoveBatMode isn't active
                 {
                     state.Position = new Vector2(e.X, e.Y);
                 }
+                else if ((moveBatMode.Enabled==true)&&(moveBat==true)) // Move bat if MoveBat Button is clicked
+                {
+                    moveBat=false;
+                }
+                
             });
 
             if (isStationary)
@@ -115,7 +123,6 @@ namespace RockyHockeyGUI.VirtualTable
 
                 isMouseHeld = true;
                 hasVelocityLine = true;
-
                 panel.Invalidate();
                 UpdateTextboxes();
             }
@@ -123,11 +130,14 @@ namespace RockyHockeyGUI.VirtualTable
 
         private void PanelMouseMove(object sender, MouseEventArgs e)
         {
+            //Move bat when MoveBatMode is active
+            MoveBatOnMouseMove(sender, e);
             if (isMouseHeld)
             {
+                MoveBatOnMouseMove(sender, e);
                 mouseHeldX = e.X;
                 mouseHeldY = e.Y;
-
+                
                 panel.Invalidate();
                 UpdateTextboxes();
             }
@@ -158,10 +168,18 @@ namespace RockyHockeyGUI.VirtualTable
                 });
 
                 hasVelocityLine = false;
-
+                moveBatMode.Enabled = true;
                 goButton.Enabled = false;
                 stopButton.Enabled = true;
             }
+        }
+
+        private void MoveBatClick(object sender, EventArgs e)
+        { 
+            if(moveBat==false)
+            moveBat = true;
+            else if (moveBat==true)
+            moveBat = false;
         }
 
         private void StopButtonClick(object sender, EventArgs e)
@@ -188,9 +206,16 @@ namespace RockyHockeyGUI.VirtualTable
         private void UpdateTextboxes()
         {
             var position = Table.Evaluate(state => state.Position);
+            var batPos = Table.Evaluate(state => state.BatPosition);
 
             x0TextBox.Text = position.X.ToString(CultureInfo.InvariantCulture);
             y0TextBox.Text = position.Y.ToString(CultureInfo.InvariantCulture);
+            //TODO bat position in textbox work in progress
+            xBatTextBox.Text = batPos.X.ToString(CultureInfo.InvariantCulture);
+            yBatTextBox.Text = batPos.Y.ToString(CultureInfo.InvariantCulture);
+
+            xBatTextBox.Text = MousePosition.X.ToString();
+            yBatTextBox.Text = MousePosition.Y.ToString();
 
             x1TextBox.Text = mouseHeldX.ToString();
             y1TextBox.Text = mouseHeldY.ToString();
@@ -203,6 +228,20 @@ namespace RockyHockeyGUI.VirtualTable
                 xBatTextBox.Text = x.ToString(CultureInfo.InvariantCulture);
                 yBatTextBox.Text = y.ToString(CultureInfo.InvariantCulture);
             }));
+        }
+        // TODO implement a function to move to bat on click while the puck is moving
+
+        private void MoveBatOnMouseMove(object sender, MouseEventArgs e)
+        {
+            Table.AccessState(state =>
+            {
+            if ((moveBatMode.Enabled==true)&&(moveBat==true)) // Move bat if MoveBat Button is clicked
+            {
+                state.BatPosition.X = e.Location.X;
+                state.BatPosition.Y = e.Location.Y; 
+            }
+            });
+         
         }
     }
 }
