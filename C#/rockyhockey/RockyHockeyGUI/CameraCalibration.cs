@@ -34,6 +34,7 @@ namespace RockyHockeyGUI
 
             this.reader = reader ?? new CameraReader();
             clickHandler = pictureBox1_Click_TopLeftCorner;
+            this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
 
             TopLeft_Radio.Checked = true;
             DrawLines_CheckBox.Checked = true;
@@ -505,6 +506,11 @@ namespace RockyHockeyGUI
         {
             ResolutionWidth_Box.Text = config.Resolution.Width.ToString();
             ResolutionHeight_Box.Text = config.Resolution.Height.ToString();
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
