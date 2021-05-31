@@ -44,10 +44,18 @@ namespace RockyHockey.MotionCaptureFramework
             image.image = new Mat();
             
             videoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
+            if (lastCapture.image == null)
+            {
+                Console.WriteLine("lastCapture is null");
+            }
+            else
+            {
+                Console.WriteLine("basst");
+            }
             
             
             // Image liefert nur null zurück und kann daher nicht ausgewertet werden
-            //test
+            
             return image;
         }
 
@@ -65,8 +73,21 @@ namespace RockyHockey.MotionCaptureFramework
                 image.image = convertedImage;
                 image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 lastCapture = image;
-                screenshot = image;                
+                screenshot = image;   
+                if (IsReady == false)
+                {
+                    IsReady = true;
+                }
             }            
+        }
+
+        private TimedImage GetScreenshot()
+        {
+            while (lastCapture.image == null)
+            {
+                videoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
+            }
+            return lastCapture;
         }
 
 
