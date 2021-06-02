@@ -13,6 +13,8 @@ namespace RockyHockey.MotionCaptureFramework
     {
 		public TimedImage lastCapture { get; protected set; }
 
+        public bool IsReady { get; set; } = false;
+
         public Bitmap nextFrame { get; set; }
         public bool SliceImage { get; protected set; }
         public abstract TimedImage getTimedImage();

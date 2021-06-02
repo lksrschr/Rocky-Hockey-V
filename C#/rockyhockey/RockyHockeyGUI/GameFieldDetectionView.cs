@@ -78,6 +78,7 @@ namespace RockyHockeyGUI
                 System.Drawing.Point k1 = (System.Drawing.Point)coordinatelist[0];
                 System.Drawing.Point k2 = (System.Drawing.Point)coordinatelist[3];
                 g.DrawLine(pen, k1.X, k1.Y, k2.X, k2.Y);
+                SaveAxes();
             }
         }
 
@@ -164,19 +165,29 @@ namespace RockyHockeyGUI
             System.Drawing.Point smallestxhighesty = new System.Drawing.Point(smallestx, highesty); // Hier ist der 0 Punkt im Koordinatensystem
             axiscoordinatelist.Add(smallestxhighesty);
             Config.Instance.GameField.Offset = smallestxhighesty;
-            System.Drawing.Point point = new System.Drawing.Point(smallestxhighesty.X - smallestxhighesty.X, smallestxhighesty.Y - smallestxhighesty.Y);
-            Config.Instance.GameField.XYOrigin = point;
+            Config.Instance.GameField.XYOrigin = smallestxhighesty;
+            
 
-            System.Drawing.Point smallestxsmallesty = new System.Drawing.Point(smallestx, smallesty); // Hier ist der Punkt ganz oben links
-            axiscoordinatelist.Add(smallestxsmallesty);
-            point = new System.Drawing.Point(smallestxsmallesty.X - smallestxhighesty.X, smallestxsmallesty.Y - smallestxhighesty.Y);
-            Config.Instance.GameField.ExtremeY = point;
+            System.Drawing.Point highestxsmallesty = new System.Drawing.Point(highestx, smallesty); // Hier ist der Punkt ganz oben links
+            axiscoordinatelist.Add(highestxsmallesty);
+            Config.Instance.GameField.ExtremeY = highestxsmallesty;
 
             System.Drawing.Point highestxhighesty = new System.Drawing.Point(highestx, highesty); // Hier ist der Punkt ganz unten rechts
             axiscoordinatelist.Add(highestxhighesty);
-            point = new System.Drawing.Point(highestxhighesty.X - smallestxhighesty.X, highestxhighesty.Y - smallestxhighesty.Y);
-            Config.Instance.GameField.ExtremeX = point;
+            Config.Instance.GameField.ExtremeX = highestxhighesty;
 
+            DrawAxis();
+
+        }
+        private void DrawAxis()
+        {
+            Graphics graphics = Graphics.FromHwnd(RectanglePicBox.Handle);
+            Pen pen = new Pen(Color.Red, 3);
+            System.Drawing.Point p1 = (System.Drawing.Point)axiscoordinatelist[0];
+            System.Drawing.Point p2 = (System.Drawing.Point)axiscoordinatelist[1];
+            System.Drawing.Point p3 = (System.Drawing.Point)axiscoordinatelist[2];
+            graphics.DrawLine(pen, p1.X, p1.Y, p3.X, p3.Y);
+            graphics.DrawLine(pen, p2.X, p2.Y, p3.X, p3.Y);
         }
     }
 }

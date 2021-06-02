@@ -24,6 +24,7 @@ namespace RockyHockey.Common
             PuckRadius = PuckRadiusMM / SizeRatio;
             BatRadiusMM = 5;
             BatRadius = BatRadiusMM / SizeRatio;
+            GameField = new GameFieldConfig();
 
             Camera1 = new CameraConfig("");
             Camera1.Resolution = new Size(320, 240);

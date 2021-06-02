@@ -91,6 +91,8 @@ namespace RockyHockeyGUI
         /// </summary>
         public LineSeries BorderLine { get; set; }
 
+        private int GameFieldDetected = 0;
+
         /// <summary>
         /// An alternative position collector to use, like a virtual table.
         /// </summary>
@@ -103,12 +105,22 @@ namespace RockyHockeyGUI
         /// <param name="e"></param>
         private async void StartButton_Click(object sender, EventArgs e)
         {
-            if (gameFieldDetectionView == null)
+
+            if (trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.IsReady == true)
             {
-                gameFieldDetectionView = new GameFieldDetectionView();
-                gameFieldDetectionView.FormClosed += OnOptionsClosed;
+                if (gameFieldDetectionView == null)
+                {
+
+                    gameFieldDetectionView = new GameFieldDetectionView(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage());
+                    gameFieldDetectionView.FormClosed += OnGamefieldDetectionClosed;
+                }
+
+                gameFieldDetectionView.Show();
             }
-            gameFieldDetectionView.Show();
+            else
+            {
+
+            }
 
             try
             {
@@ -262,6 +274,20 @@ namespace RockyHockeyGUI
             this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             if (imageDebuggingActive)
                 debuggingWindow?.displayImage(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider.lastCapture);
+            
+            if (trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.IsReady == true && GameFieldDetected == 0)
+            {
+                if (gameFieldDetectionView == null)
+                {
+
+                    gameFieldDetectionView = new GameFieldDetectionView(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage());
+                    gameFieldDetectionView.FormClosed += OnGamefieldDetectionClosed;
+                    GameFieldDetected++;
+                }
+
+                gameFieldDetectionView.Show();
+            }
+           
 
             Refresh();
         }
@@ -370,6 +396,13 @@ namespace RockyHockeyGUI
             };
 
             tableView.Show();
+        }
+
+        private void OnGamefieldDetectionClosed(object sender, EventArgs e)
+        {
+            gameFieldDetectionView.Dispose();
+            gameFieldDetectionView = null;
+            Console.WriteLine(Config.Instance.GameField.UpperLeft);
         }
     }
 }
