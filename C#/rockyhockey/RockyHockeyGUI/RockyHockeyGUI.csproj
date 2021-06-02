@@ -196,7 +196,6 @@
     <EmbeddedResource Include="VirtualTable\VirtualTableView.resx">
       <DependentUpon>VirtualTableView.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="libOpenCvSharpExtern.so" />
     <None Include="OpenCvSharp.Blob.dll.config" />
     <None Include="OpenCvSharp.CPlusPlus.dll.config" />
     <None Include="OpenCvSharp.dll.config" />
@@ -235,9 +234,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="License-LGPL.txt" />
-    <Content Include="OpenCvSharpExtern.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="rocky_logo.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

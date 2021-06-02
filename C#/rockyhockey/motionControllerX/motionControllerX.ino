@@ -19,6 +19,7 @@ long movement = 0;
 int speedSetting = 0;
 int enabled = 0;
 float assumedPosition = 0;
+char movement_string = 0;
 
 void setup()
 {  
@@ -32,7 +33,7 @@ void setup()
   stepper.setMaxSpeed(1500);
   stepper.setAcceleration(9999);
   stepper.setEnablePin(ENABLE_PIN);
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   calibrate();
 }
@@ -78,36 +79,16 @@ void loop()
     //just testing the switches
     //Serial.print(digitalRead(END_PIN));
     //delay(999);
-    
-    stepper.move(movement);
-    stepper.setSpeed(speedSetting);
-    if(stepper.distanceToGo() != 0){
-      EN_ENABLE;
-    }
-    while(stepper.distanceToGo() != 0 && moveAllowed()){
-    stepper.runSpeedToPosition();
-    }
-    movement = stepper.distanceToGo();
-    if(stepper.distanceToGo() == 0){
-      EN_DISABLE;
-    }
 
 if(Serial.available() > 0) {
-    String movement_string  = Serial.readStringUntil(',');
-    if(movement_string == "position\n" | movement_string == "position"){
-      Serial.print(stepper.currentPosition());
-    }
-    else if(movement_string == "calibrate\n" | movement_string == "calibrate"){
-      calibrate();
-    }
-    else{
-      movement = movement_string.toInt();   
-    }
-    Serial.read();
-    String speed_string = Serial.readStringUntil(',');
-    Serial.read();
-    speedSetting =  speed_string.toInt();  
+  if (Serial.available() > 0){
+    movement_string  = Serial.read();
+  }
+    
+  if((movement_string >= '0') && (movement_string <= '9')){
+    long x = 200;
+    stepper.runToNewPosition(x);
+    Serial.print(stepper.currentPosition());
   }
 }
-
-
+}
