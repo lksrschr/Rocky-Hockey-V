@@ -22,20 +22,19 @@ namespace RockyHockeyGUI.VirtualTable
         private readonly float puckRadius;
         private readonly float batRadius;
         private readonly object lockObj = new object();
-        float maxSpeed = 5; //max speed of the puck
         private readonly TableState tableState;
 
         private bool shouldStop;
         private long targetElapsedMillis;
         private Stopwatch stopwatch;
         private Thread workerThread;
-        internal VirtualTableWorker(int fieldWidth, int fieldHeight, float puckRadius)
+        internal VirtualTableWorker(int fieldWidth, int fieldHeight, float puckRadius, float batRadius)
         {
             this.fieldWidth = fieldWidth;
             this.fieldHeight = fieldHeight;
             this.puckRadius = puckRadius;
             this.batRadius = batRadius;
-            tableState = new TableState(new Vector2(fieldWidth * 0.75f, fieldHeight * 0.5f));
+            tableState = new TableState(new Vector2(fieldWidth * 0.75f, fieldHeight * 0.5f), new Vector2(fieldWidth * 0.25f, fieldHeight * 0.5f));
         }
 
         /// <summary>
@@ -135,10 +134,37 @@ namespace RockyHockeyGUI.VirtualTable
         /// </summary>
         private void Tick()
         {
+            
             var velocity = tableState.Velocity;
             var batVelocity = tableState.VelocityBat;
             var position = tableState.Position;
             var batPos = tableState.BatPosition;
+            var batStationary = tableState.IsBatStationary;
+            // Check if Bat is moving
+            if(batVelocity.Length()<0.1f)
+            {
+                batStationary = true;
+            }
+
+            // Bounce off Batposition
+            // Check if position of puck is within the range of ]0; 39.5] to simulate a collision
+            if ( ( (Math.Abs(position.X - batPos.X) >= 0f)&&(Math.Abs(position.X - batPos.X) <= 39.5f) ) && 
+            ( (Math.Abs(position.Y - batPos.Y) >= 0f)&&(Math.Abs(position.Y - batPos.Y) <= 39.5f) ) )
+            {
+                position += -velocity;
+                if(!batStationary)
+                {
+                    velocity.Y *=  -(batVelocity.Y);
+                    velocity.X *=  -(batVelocity.X);
+                }
+                else if(batStationary)
+                {
+                    velocity.Y *=  -1;
+                    velocity.X *=  -1;
+                } 
+                position += -velocity; 
+            }
+            // position -= velocity;
             if (velocity != Vector2.Zero)
             {
                 // Try to get puck unstuck if it was placed inside a wall
@@ -158,17 +184,6 @@ namespace RockyHockeyGUI.VirtualTable
                 {
                     position.X -= 2 * (position.X - fieldWidth + puckRadius);
                     velocity.X *= -1;
-                }
-
-                // Bounce off Batposition
-                if ((Math.Abs(position.X - batPos.X) < 37.55555) && (Math.Abs(position.Y - batPos.Y) < 37.55555))
-                {
-                    velocity.Y *=  -(batVelocity.Y);
-                    velocity.X *=  -(batVelocity.X);
-                    // LINES BELOW EXPERIMENTAL NOT WORKING PROPERLY IN THIS PARTICULAR SCENARIO 
-                    // Move bat when hit by puck
-                    batVelocity.Y += velocity.Y*(float)0.01;
-                    batVelocity.X += velocity.X*(float)0.01;
                 }
 
                 // Bounce off the long sides
@@ -191,25 +206,13 @@ namespace RockyHockeyGUI.VirtualTable
                 {
                     velocity = Vector2.Zero;
                 }
-
-                tableState.Velocity = velocity;
-                tableState.Position = position;
-                //TODO MouseSpeed to use for collision with the puck not finished yet !!
-                if(tableState.VelocityBat==Vector2.Zero)
-                {
-                    tableState.VelocityBat.X = MouseSpeed();
-                    tableState.VelocityBat.Y = MouseSpeed();
-                }
-                else
-                {
-                    tableState.VelocityBat.X = (float)MouseSpeed();
-                    tableState.VelocityBat.Y = (float)MouseSpeed();
-                }
                 
-                tableState.BatPosition = batPos;
             }
+            // Update the speed and position of puck and position of bat 
+            tableState.Velocity = velocity;
+            tableState.Position = position;
+            tableState.BatPosition = batPos;
         }
-
         /// <summary>
         /// Used by path prediction.
         /// </summary>
@@ -265,5 +268,6 @@ namespace RockyHockeyGUI.VirtualTable
 
             return value;
         }
+
     }
 }

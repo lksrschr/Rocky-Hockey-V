@@ -41,6 +41,7 @@ namespace RockyHockeyGUI.VirtualTable
         private bool isMouseHeld;
         private bool hasVelocityLine;
         public bool moveBat;
+        Vector2 currentPos;
 
         internal VirtualTableWorker Table { get; }
 
@@ -57,7 +58,7 @@ namespace RockyHockeyGUI.VirtualTable
                 BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic, null, panel,
                 new object[] {true});
 
-            Table = new VirtualTableWorker(FieldWidth, FieldHeight, PuckRadius);
+            Table = new VirtualTableWorker(FieldWidth, FieldHeight, PuckRadius, BatRadius);
             Table.Start();
 
             TrackBarScroll(trackBar, EventArgs.Empty);
@@ -130,8 +131,11 @@ namespace RockyHockeyGUI.VirtualTable
 
         private void PanelMouseMove(object sender, MouseEventArgs e)
         {
-            //Move bat when MoveBatMode is active
+            // Move bat when MoveBatMode is active
             MoveBatOnMouseMove(sender, e);
+            // Get current mouse location
+            currentPos.X = e.Location.X;
+            currentPos.Y = e.Location.Y;
             if (isMouseHeld)
             {
                 MoveBatOnMouseMove(sender, e);
@@ -176,10 +180,21 @@ namespace RockyHockeyGUI.VirtualTable
 
         private void MoveBatClick(object sender, EventArgs e)
         { 
+
             if(moveBat==false)
-            moveBat = true;
+            {
+                Table.AccessState(state => state.IsBatStationary = false);
+                moveBat = true;
+            }
+           
             else if (moveBat==true)
-            moveBat = false;
+            {
+                moveBat = false;
+                Table.AccessState(state => state.IsBatStationary = true
+                
+                );
+            }
+            
         }
 
         private void StopButtonClick(object sender, EventArgs e)
@@ -206,19 +221,18 @@ namespace RockyHockeyGUI.VirtualTable
         private void UpdateTextboxes()
         {
             var position = Table.Evaluate(state => state.Position);
-            var batPos = Table.Evaluate(state => state.BatPosition);
-
             x0TextBox.Text = position.X.ToString(CultureInfo.InvariantCulture);
             y0TextBox.Text = position.Y.ToString(CultureInfo.InvariantCulture);
-            //TODO bat position in textbox work in progress
+            x1TextBox.Text = mouseHeldX.ToString();
+            y1TextBox.Text = mouseHeldY.ToString();
+        }
+
+        private void UpdateBatTextboxes()
+        {
+            var batPos = Table.Evaluate(state => state.BatPosition);
             xBatTextBox.Text = batPos.X.ToString(CultureInfo.InvariantCulture);
             yBatTextBox.Text = batPos.Y.ToString(CultureInfo.InvariantCulture);
 
-            xBatTextBox.Text = MousePosition.X.ToString();
-            yBatTextBox.Text = MousePosition.Y.ToString();
-
-            x1TextBox.Text = mouseHeldX.ToString();
-            y1TextBox.Text = mouseHeldY.ToString();
         }
 
         private void AxisOnMove(double x, double y)
@@ -230,18 +244,48 @@ namespace RockyHockeyGUI.VirtualTable
             }));
         }
         // TODO implement a function to move to bat on click while the puck is moving
-
+        // TODO NEXT: Puck is getting stuck inside the bat try to fix next time
         private void MoveBatOnMouseMove(object sender, MouseEventArgs e)
         {
             Table.AccessState(state =>
             {
-            if ((moveBatMode.Enabled==true)&&(moveBat==true)) // Move bat if MoveBat Button is clicked
-            {
-                state.BatPosition.X = e.Location.X;
-                state.BatPosition.Y = e.Location.Y; 
+                var batPosition = state.BatPosition;
+                var position = state.Position;
+                if( (moveBatMode.Enabled==true)&&(moveBat==true) )
+                {
+                    // set the velocity of the bat upon movement of the mouse
+                    state.VelocityBat = new Vector2(currentPos.X - e.Location.X, currentPos.Y - e.Location.Y ) / 25f;
+
+                    if ( ( (Math.Abs(position.X - batPosition.X) >= 0f)&&(Math.Abs(position.X - batPosition.X) <= 39.5f) ) && 
+                    ( (Math.Abs(position.Y - batPosition.Y) >= 0f)&&(Math.Abs(position.Y - batPosition.Y) <= 39.5f) ) ) 
+                    {
+                        // EXPERIMENTAL
+                        if((!state.IsBatStationary)&&(state.VelocityBat.Length()>0.1f))
+                        {
+                            state.Velocity.Y +=  (state.VelocityBat.Y)*25;
+                            state.Velocity.X +=  (state.VelocityBat.X)*25;
+                        }
+                        else if(state.VelocityBat.Length()<=0.1f)
+                        {
+                            state.IsBatStationary=true;
+                            state.Velocity.Y *=  -1;
+                            state.Velocity.X *=  -1;
+                        }
+                        // EXPERIMENTAL
+                    }
+                }
             }
+            );
+            // Move bat if MoveBat Button is clicked
+            Table.AccessState(state =>
+            {
+                if ((moveBatMode.Enabled==true)&&(moveBat==true)) 
+                {
+                    state.BatPosition.X = e.Location.X;
+                    state.BatPosition.Y = e.Location.Y;
+                    UpdateBatTextboxes();
+                }
             });
-         
         }
     }
 }
