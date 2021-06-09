@@ -29,13 +29,17 @@ void calibrate_x()
     Serial.println("Calibrate X");
     stepperx.setSpeed(5000);
 
-    stepperx.move(-max_x_position);
-    while (stepperx.distanceToGo() != 0 && digitalRead(END_PIN_X) == 1)
+    
+    while (digitalRead(END_PIN_X) == 1)
     {
-        stepperx.runSpeedToPosition();
+      stepperx.move(-1000);
+      stepperx.runSpeedToPosition();
     }
     stepperx.setCurrentPosition(0);
+    stepperx.move(7850);
+    stepperx.runSpeedToPosition();
     stepperx.disableOutputs();
+    Serial.print(stepperx.currentPosition());
 }
 
 void calibrate_y()
