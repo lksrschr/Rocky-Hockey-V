@@ -10,6 +10,11 @@ namespace RockyHockey.Common
     [Serializable]
     public class CameraConfig
     {
+        public CameraConfig(String name)
+        {
+            this.name = name;
+        }
+
         public CameraConfig(int index)
         {
             this.index = index;
@@ -21,6 +26,8 @@ namespace RockyHockey.Common
         /// Index of the camera
         /// </summary>
         public int index;
+
+        public String name;
 
         /// <summary>
         /// wether or not the camera records the origin coordinate

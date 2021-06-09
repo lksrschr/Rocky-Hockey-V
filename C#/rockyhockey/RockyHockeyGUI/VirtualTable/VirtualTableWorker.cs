@@ -137,7 +137,7 @@ namespace RockyHockeyGUI.VirtualTable
         {
             var velocity = tableState.Velocity;
             var position = tableState.Position;
-            var batPos = tableState.BatPosition;
+
             if (velocity != Vector2.Zero)
             {
                 // Try to get puck unstuck if it was placed inside a wall
@@ -156,13 +156,6 @@ namespace RockyHockeyGUI.VirtualTable
                 else if (position.X > fieldWidth - puckRadius)
                 {
                     position.X -= 2 * (position.X - fieldWidth + puckRadius);
-                    velocity.X *= -1;
-                }
-
-                // Bounce off Batposition
-                if ((Math.Abs(position.X - batPos.X) < 35) && (Math.Abs(position.Y - batPos.Y) < 35))
-                {
-                    velocity.Y *= -1;
                     velocity.X *= -1;
                 }
 

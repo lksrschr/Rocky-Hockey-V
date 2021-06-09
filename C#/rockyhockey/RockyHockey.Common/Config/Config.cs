@@ -11,6 +11,7 @@ namespace RockyHockey.Common
     {
         private Config()
         {
+            
             GameFieldSize = new Size(423, 238);
             FrameRate = 187;
             GameDifficulty = Difficulties.hard;
@@ -23,8 +24,9 @@ namespace RockyHockey.Common
             PuckRadius = PuckRadiusMM / SizeRatio;
             BatRadiusMM = 5;
             BatRadius = BatRadiusMM / SizeRatio;
+            GameField = new GameFieldConfig();
 
-            Camera1 = new CameraConfig(0);
+            Camera1 = new CameraConfig("");
             Camera1.Resolution = new Size(320, 240);
             Camera1.UpperRight = new Coordinate(320, 0);
             Camera1.LowerLeft = new Coordinate(0, 240);
@@ -72,7 +74,10 @@ namespace RockyHockey.Common
         /// </summary>
         public CameraConfig Camera1 { get; set; }
 
+
         public PuckDetectionConfig detectionConfig { get; set; }
+
+        public GameFieldConfig GameField { get; set; }
 
         /// <summary>
         /// Size of the gamefield

@@ -3,15 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 using Emgu.CV.CvEnum;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using RockyHockey.Common;
+using AForge.Video.DirectShow;
+using AForge.Video;
 
 namespace RockyHockey.MotionCaptureFramework
 {
     public class CameraReader : ImageProvider
     {
+        //AForge
+        private VideoCaptureDevice videoCaptureDevice;
+
+        //EmguCV
         private VideoCapture camera;
+
+        private TimedImage screenshot = new TimedImage();
 
         /// <summary>
         /// initializes the camera
@@ -21,33 +31,73 @@ namespace RockyHockey.MotionCaptureFramework
         {
             cameraConfig = cameraConfig ?? Config.Instance.Camera1;
             SliceImage = true;
-            camera = new VideoCapture(Config.Instance.Camera1.index);
-
-            if (withConfigBorders)
-            {
-                camera.SetCaptureProperty(CapProp.FrameWidth, cameraConfig.Resolution.Width);
-                camera.SetCaptureProperty(CapProp.FrameHeight, cameraConfig.Resolution.Height);
-            }
-
-            camera.SetCaptureProperty(CapProp.Fps, Config.Instance.FrameRate);
-            camera.Start();
+            
+            //configure selected Camera
+            videoCaptureDevice = new VideoCaptureDevice(Config.Instance.Camera1.name);
+            videoCaptureDevice.Start();
+            
         }
 
         public override TimedImage getTimedImage()
         {
             TimedImage image = new TimedImage();
             image.image = new Mat();
-            camera.Read(image.image);
-            image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-			lastCapture = image;
+            
+            videoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
+            if (lastCapture.image == null)
+            {
+                Console.WriteLine("lastCapture is null");
+            }
+            else
+            {
+                Console.WriteLine("basst");
+            }
+            
+            
+            // Image liefert nur null zurück und kann daher nicht ausgewertet werden
+            
             return image;
         }
 
+        private void VideoCaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        {
+            TimedImage image = new TimedImage();
+            image.image = new Mat();
+            Mat convertedImage = new Mat();
+            nextFrame = (Bitmap)eventArgs.Frame.Clone();
+            Bitmap nextFrame2 = (Bitmap)eventArgs.Frame.Clone();
+            if (nextFrame2 != null)
+            {
+                Image<Bgr, byte> imageCV = new Image<Bgr, Byte>(nextFrame2);
+                convertedImage = imageCV.Mat;
+                image.image = convertedImage;
+                image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                lastCapture = image;
+                screenshot = image;   
+                if (IsReady == false)
+                {
+                    IsReady = true;
+                }
+            }            
+        }
+
+        private TimedImage GetScreenshot()
+        {
+            while (lastCapture.image == null)
+            {
+                videoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
+            }
+            return lastCapture;
+        }
+
+
         public override void finalize()
         {
-            camera?.Stop();
-            camera?.Dispose();
-            camera = null;
+            //camera?.Stop();
+            //camera?.Dispose();
+            //camera = null;
+            videoCaptureDevice?.SignalToStop();
+            videoCaptureDevice = null;
         }
 
         public override int getFPS()
