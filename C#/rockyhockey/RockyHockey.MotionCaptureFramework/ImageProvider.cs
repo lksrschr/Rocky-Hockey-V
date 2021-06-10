@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Emgu.CV;
+using Emgu.CV.Structure;
 using AForge.Video.DirectShow;
 
 namespace RockyHockey.MotionCaptureFramework
@@ -12,6 +13,8 @@ namespace RockyHockey.MotionCaptureFramework
     public abstract class ImageProvider
     {
 		public TimedImage lastCapture { get; protected set; }
+
+        public Image<Bgr, Byte> puckdetectionPicture { get; set; }
 
         public bool IsReady { get; set; } = false;
 

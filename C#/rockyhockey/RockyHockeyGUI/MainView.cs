@@ -18,6 +18,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 using RockyHockey.MotionCaptureFramework;
 using RockyHockeyGUI.VirtualTable;
 
+
 namespace RockyHockeyGUI
 {
     /// <summary>
@@ -35,6 +36,7 @@ namespace RockyHockeyGUI
             {
                 StopButton.Enabled = false;
                 ImageDebuggingButton.Enabled = false;
+                puckDetectionFiducial = new PuckDetectionFiducial(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider);
 
                 myModel = new PlotModel();
                 var timer = new System.Windows.Forms.Timer { Interval = 50 };
@@ -70,6 +72,8 @@ namespace RockyHockeyGUI
         private Stopwatch stopwatch;
         
         private TrajectoryCalculationFramework trajectoryCalculationFramework;
+
+        private PuckDetectionFiducial puckDetectionFiducial;
 
         /// <summary>
         /// Logger for displaying a MessageBox
@@ -269,7 +273,7 @@ namespace RockyHockeyGUI
             {
                 GameTimeLabel.Text = $"Game time: {stopwatch.Elapsed.ToString().Split('.').FirstOrDefault()}";
             }
-
+            System.Drawing.Point puckCoordinates = puckDetectionFiducial.GetPuckPosition();
             pictureBox1.Image = trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage();
             this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             if (imageDebuggingActive)
