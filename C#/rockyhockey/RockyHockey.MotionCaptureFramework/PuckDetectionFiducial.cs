@@ -35,6 +35,7 @@ namespace RockyHockey.MotionCaptureFramework
             {
                 return new System.Drawing.Point(0, 0);
             }
+            else this.imageProvider = imageProvider;
             Image<Bgr, byte> emguImage = imageProvider.puckdetectionPicture; //transform bitmap to byte image because emgu cv needs a byte image
             System.Drawing.Point returnPoint = new System.Drawing.Point();
 
@@ -55,7 +56,7 @@ namespace RockyHockey.MotionCaptureFramework
             PointF[][] cornersOfDetectedMarker = Corners.ToArrayOfArray();
 
             
-            if (cornersOfDetectedMarker != null)
+            if (cornersOfDetectedMarker.Length != 0)
             {
                 returnPoint.X = (int)((cornersOfDetectedMarker[0][0].X + cornersOfDetectedMarker[0][2].X) / 2);
                 returnPoint.Y = (int)((cornersOfDetectedMarker[0][0].Y + cornersOfDetectedMarker[0][2].Y) / 2);
