@@ -277,7 +277,6 @@ namespace RockyHockeyGUI
             
             pictureBox1.Image = trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage();
             puckcoordinateTextbox.Text = puckCoordinates.ToString();
-            PlotView.Update = puckCoordinates.X;
             this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             if (imageDebuggingActive)
                 debuggingWindow?.displayImage(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider.lastCapture);
