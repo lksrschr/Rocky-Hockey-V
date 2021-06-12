@@ -25,6 +25,7 @@ namespace RockyHockeyGUI
         {
             
             InitializeComponent();
+            this.RectanglePicBox.SizeMode = PictureBoxSizeMode.StretchImage;
             this.imgInput = imgInput;
             RectanglePicBox.Image = this.imgInput;
         }
