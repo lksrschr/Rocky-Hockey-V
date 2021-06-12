@@ -274,7 +274,10 @@ namespace RockyHockeyGUI
                 GameTimeLabel.Text = $"Game time: {stopwatch.Elapsed.ToString().Split('.').FirstOrDefault()}";
             }
             System.Drawing.Point puckCoordinates = puckDetectionFiducial.GetPuckPosition(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider);
+            
             pictureBox1.Image = trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage();
+            puckcoordinateTextbox.Text = puckCoordinates.ToString();
+            PlotView.Update = puckCoordinates.X;
             this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             if (imageDebuggingActive)
                 debuggingWindow?.displayImage(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider.lastCapture);
@@ -407,6 +410,23 @@ namespace RockyHockeyGUI
             gameFieldDetectionView.Dispose();
             gameFieldDetectionView = null;
             Console.WriteLine(Config.Instance.GameField.UpperLeft);
+        }
+
+        private void resetGamefieldButton_Click(object sender, EventArgs e)
+        {
+            if (gameFieldDetectionView == null)
+            {
+
+                gameFieldDetectionView = new GameFieldDetectionView(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage());
+                gameFieldDetectionView.FormClosed += OnGamefieldDetectionClosed;
+            }
+
+            gameFieldDetectionView.Show();
+        }
+
+        private void puckcoordinateTextbox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

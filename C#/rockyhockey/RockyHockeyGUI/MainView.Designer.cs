@@ -41,6 +41,9 @@
             this.ImageDebuggingButton = new System.Windows.Forms.Button();
             this.CameraCalibrationButton = new System.Windows.Forms.Button();
             this.ImageProcessingCalibration_Button = new System.Windows.Forms.Button();
+            this.resetGamefieldButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.puckcoordinateTextbox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -68,11 +71,11 @@
             // 
             // PlotView
             // 
-            this.PlotView.Location = new System.Drawing.Point(8, 39);
+            this.PlotView.Location = new System.Drawing.Point(8, 85);
             this.PlotView.Margin = new System.Windows.Forms.Padding(2);
             this.PlotView.Name = "PlotView";
             this.PlotView.PanCursor = System.Windows.Forms.Cursors.Hand;
-            this.PlotView.Size = new System.Drawing.Size(764, 391);
+            this.PlotView.Size = new System.Drawing.Size(764, 345);
             this.PlotView.TabIndex = 0;
             this.PlotView.Text = "PlotView";
             this.PlotView.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
@@ -169,11 +172,41 @@
             this.ImageProcessingCalibration_Button.UseVisualStyleBackColor = true;
             this.ImageProcessingCalibration_Button.Click += new System.EventHandler(this.ImageProcessingCalibration_Button_Click);
             // 
+            // resetGamefieldButton
+            // 
+            this.resetGamefieldButton.Location = new System.Drawing.Point(778, 343);
+            this.resetGamefieldButton.Name = "resetGamefieldButton";
+            this.resetGamefieldButton.Size = new System.Drawing.Size(130, 23);
+            this.resetGamefieldButton.TabIndex = 10;
+            this.resetGamefieldButton.Text = "Reset Gamefield";
+            this.resetGamefieldButton.UseVisualStyleBackColor = true;
+            this.resetGamefieldButton.Click += new System.EventHandler(this.resetGamefieldButton_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 47);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(132, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Detected Puckcoordinate:";
+            // 
+            // puckcoordinateTextbox
+            // 
+            this.puckcoordinateTextbox.Location = new System.Drawing.Point(150, 47);
+            this.puckcoordinateTextbox.Name = "puckcoordinateTextbox";
+            this.puckcoordinateTextbox.Size = new System.Drawing.Size(100, 20);
+            this.puckcoordinateTextbox.TabIndex = 12;
+            this.puckcoordinateTextbox.TextChanged += new System.EventHandler(this.puckcoordinateTextbox_TextChanged);
+            // 
             // MainView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1106, 442);
+            this.Controls.Add(this.puckcoordinateTextbox);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.resetGamefieldButton);
             this.Controls.Add(this.ImageProcessingCalibration_Button);
             this.Controls.Add(this.CameraCalibrationButton);
             this.Controls.Add(this.ImageDebuggingButton);
@@ -212,6 +245,9 @@
         private System.Windows.Forms.Button ImageDebuggingButton;
         private System.Windows.Forms.Button CameraCalibrationButton;
         private System.Windows.Forms.Button ImageProcessingCalibration_Button;
+        private System.Windows.Forms.Button resetGamefieldButton;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox puckcoordinateTextbox;
     }
 }
 
