@@ -36,7 +36,7 @@ namespace RockyHockeyGUI
             {
                 StopButton.Enabled = false;
                 ImageDebuggingButton.Enabled = false;
-                puckDetectionFiducial = new PuckDetectionFiducial(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider);
+                puckDetectionFiducial = new PuckDetectionFiducial();
 
                 myModel = new PlotModel();
                 var timer = new System.Windows.Forms.Timer { Interval = 50 };
@@ -273,7 +273,7 @@ namespace RockyHockeyGUI
             {
                 GameTimeLabel.Text = $"Game time: {stopwatch.Elapsed.ToString().Split('.').FirstOrDefault()}";
             }
-            System.Drawing.Point puckCoordinates = puckDetectionFiducial.GetPuckPosition();
+            System.Drawing.Point puckCoordinates = puckDetectionFiducial.GetPuckPosition(trajectoryCalculationFramework?.motionCaptureProvider.imageProvider);
             pictureBox1.Image = trajectoryCalculationFramework?.motionCaptureProvider.imageProvider?.lastCapture.GetImage();
             this.pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             if (imageDebuggingActive)

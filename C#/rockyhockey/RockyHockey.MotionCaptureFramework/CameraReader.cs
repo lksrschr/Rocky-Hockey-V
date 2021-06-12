@@ -69,6 +69,7 @@ namespace RockyHockey.MotionCaptureFramework
             if (nextFrame2 != null)
             {
                 Image<Bgr, byte> imageCV = new Image<Bgr, Byte>(nextFrame2);
+                puckdetectionPicture = imageCV;
                 convertedImage = imageCV.Mat;
                 image.image = convertedImage;
                 image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();

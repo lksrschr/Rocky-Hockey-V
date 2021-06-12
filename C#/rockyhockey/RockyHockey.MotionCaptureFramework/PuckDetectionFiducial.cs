@@ -24,12 +24,17 @@ namespace RockyHockey.MotionCaptureFramework
         ImageProvider imageProvider;
 
 
-        public PuckDetectionFiducial(ImageProvider imageProvider)
+        public PuckDetectionFiducial()
         {
-            this.imageProvider = imageProvider;
+            
         }
-        public System.Drawing.Point GetPuckPosition()
+        public System.Drawing.Point GetPuckPosition(ImageProvider imageProvider)
         {
+
+            if (imageProvider == null || imageProvider.puckdetectionPicture == null)
+            {
+                return new System.Drawing.Point(0, 0);
+            }
             Image<Bgr, byte> emguImage = imageProvider.puckdetectionPicture; //transform bitmap to byte image because emgu cv needs a byte image
             System.Drawing.Point returnPoint = new System.Drawing.Point();
 
