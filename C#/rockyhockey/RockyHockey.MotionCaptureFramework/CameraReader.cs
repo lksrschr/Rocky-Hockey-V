@@ -64,17 +64,15 @@ namespace RockyHockey.MotionCaptureFramework
             TimedImage image = new TimedImage();
             image.image = new Mat();
             Mat convertedImage = new Mat();
-            nextFrame = (Bitmap)eventArgs.Frame.Clone();
-            Bitmap nextFrame2 = (Bitmap)eventArgs.Frame.Clone();
-            if (nextFrame2 != null)
+            Bitmap newFrame = (Bitmap)eventArgs.Frame.Clone();
+            if (newFrame != null)
             {
-                Image<Bgr, byte> imageCV = new Image<Bgr, Byte>(nextFrame2);
+                Image<Bgr, byte> imageCV = new Image<Bgr, Byte>(newFrame);
                 puckdetectionPicture = imageCV;
                 convertedImage = imageCV.Mat;
                 image.image = convertedImage;
                 image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                 lastCapture = image;
-                screenshot = image;   
                 if (IsReady == false)
                 {
                     IsReady = true;
