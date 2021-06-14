@@ -116,6 +116,7 @@ namespace RockyHockeyGUI
 
         private void DetermineandSaveAxes()
         {
+
             int smallestx = getMinxy(sortedcoordinatelist, "X");
             int smallesty = getMinxy(sortedcoordinatelist, "Y");
             int highestx = getMaxxy(sortedcoordinatelist, "X");
@@ -156,69 +157,70 @@ namespace RockyHockeyGUI
 
         private void FillSortedArray()
         {
-            System.Drawing.Point upperleft, upperright, lowerright, lowerleft;
-            System.Drawing.Point temp = (System.Drawing.Point)clickcoordinatelist[0];
-            //upperleft
+            if (sortedcoordinatelist.Count <= 0) {
+                System.Drawing.Point upperleft, upperright, lowerright, lowerleft;
+                System.Drawing.Point temp = (System.Drawing.Point)clickcoordinatelist[0];
+                //upperleft
 
-            for (int i = 0; i < clickcoordinatelist.Count; i++)
-            {
-                if (temp.X + temp.Y > ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                for (int i = 0; i < clickcoordinatelist.Count; i++)
                 {
-                    temp = (System.Drawing.Point)clickcoordinatelist[i];
+                    if (temp.X + temp.Y > ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                    {
+                        temp = (System.Drawing.Point)clickcoordinatelist[i];
+                    }
                 }
-            }
-            upperleft = temp;
+                upperleft = temp;
 
-            //lowerright
-            for (int i = 0; i < clickcoordinatelist.Count; i++)
-            {
-                if (temp.X + temp.Y <= ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                //lowerright
+                for (int i = 0; i < clickcoordinatelist.Count; i++)
                 {
-                    temp = (System.Drawing.Point)clickcoordinatelist[i];
+                    if (temp.X + temp.Y <= ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                    {
+                        temp = (System.Drawing.Point)clickcoordinatelist[i];
+                    }
                 }
-            }
-            lowerright = temp;
+                lowerright = temp;
 
-            //Delete upperleft and lowerright
-            for (int i = 0; i < clickcoordinatelist.Count; i++)
-            {
-                int x = 0;
-                if ((upperleft.X + upperleft.Y) == ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                //Delete upperleft and lowerright
+                for (int i = 0; i < clickcoordinatelist.Count; i++)
                 {
-                    clickcoordinatelist.RemoveAt(i);
-                    x = 1;
+                    int x = 0;
+                    if ((upperleft.X + upperleft.Y) == ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                    {
+                        clickcoordinatelist.RemoveAt(i);
+                        x = 1;
+                    }
+
+                    if ((lowerright.X + lowerright.Y) == ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                    {
+                        clickcoordinatelist.RemoveAt(i);
+                        x = 1;
+                    }
+                    if (x == 1) i = -1;
+
                 }
 
-                if ((lowerright.X + lowerright.Y) == ((System.Drawing.Point)clickcoordinatelist[i]).X + ((System.Drawing.Point)clickcoordinatelist[i]).Y)
+                //Filter highestxsamllesty
+                temp = (System.Drawing.Point)clickcoordinatelist[0];
+                if (temp.X < ((System.Drawing.Point)clickcoordinatelist[1]).X)
                 {
-                    clickcoordinatelist.RemoveAt(i);
-                    x = 1;
+                    upperright = (System.Drawing.Point)clickcoordinatelist[1];
+                    lowerleft = temp;
                 }
-                if (x == 1) i = -1;
+                else
+                {
+                    lowerleft = (System.Drawing.Point)clickcoordinatelist[1];
+                    upperright = temp;
+                }
+
+
+
+                sortedcoordinatelist.Add(upperleft);
+                sortedcoordinatelist.Add(upperright);
+                sortedcoordinatelist.Add(lowerright);
+                sortedcoordinatelist.Add(lowerleft);
 
             }
-
-            //Filter highestxsamllesty
-            temp = (System.Drawing.Point)clickcoordinatelist[0];
-            if (temp.X < ((System.Drawing.Point)clickcoordinatelist[1]).X)
-            {
-                upperright = (System.Drawing.Point)clickcoordinatelist[1];
-                lowerleft = temp;
-            }
-            else
-            {
-                lowerleft = (System.Drawing.Point)clickcoordinatelist[1];
-                upperright = temp;
-            }
-
-
-
-            sortedcoordinatelist.Add(upperleft);
-            sortedcoordinatelist.Add(upperright);
-            sortedcoordinatelist.Add(lowerright);
-            sortedcoordinatelist.Add(lowerleft);
-
-
         }
 
         public int getMaxxy(ArrayList fulllist, String xy)
