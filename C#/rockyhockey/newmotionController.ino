@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include <AccelStepper.h>
 
 #define ENABLE_PIN 8
@@ -11,12 +10,12 @@
 #define MOTOR_B_STEP_PIN 4
 #define MOTOR_B_DIR_PIN 7
 
-AccelStepper stepperx(1, MOTOR_A_STEP_PIN, MOTOR_A_DIR_PIN);
-AccelStepper steppery(1, MOTOR_B_STEP_PIN, MOTOR_B_DIR_PIN);
+AccelStepper steppery(1, MOTOR_A_STEP_PIN, MOTOR_A_DIR_PIN);
+AccelStepper stepperx(1, MOTOR_B_STEP_PIN, MOTOR_B_DIR_PIN);
 
 //constants
-long max_x_position = 3900;
-long max_y_position = 3900;
+long max_x_position = 16000;
+long max_y_position = 16000;
 bool st_enabled = false;
 //used variables
 long movement_x = 0;
@@ -29,12 +28,16 @@ void calibrate_x()
     Serial.println("Calibrate X");
     stepperx.setSpeed(5000);
 
-    stepperx.move(-max_x_position);
+    stepperx.move(-4000);
     while (stepperx.distanceToGo() != 0 && digitalRead(END_PIN_X) == 1)
     {
+        stepperx.move(-4000);
         stepperx.runSpeedToPosition();
     }
     stepperx.setCurrentPosition(0);
+    stepperx.move(7850);
+    stepperx.runSpeedToPosition();
+    
     stepperx.disableOutputs();
 }
 
@@ -67,16 +70,16 @@ void setup()
     steppery.setPinsInverted(false, false, true);
 
     // stepperx.setMinPulseWidth(60);
-    stepperx.setMaxSpeed(5000);
-    stepperx.setAcceleration(2500000);
-    stepperx.setSpeed(1500);
+    stepperx.setMaxSpeed(50000);
+    stepperx.setAcceleration(25000000);
+    stepperx.setSpeed(50000);
 
     stepperx.setEnablePin(ENABLE_PIN);
 
     // steppery.setMinPulseWidth(60);
-    steppery.setMaxSpeed(5000);
-    steppery.setAcceleration(2500000);
-    steppery.setSpeed(1500);
+    steppery.setMaxSpeed(50000);
+    steppery.setAcceleration(25000000);
+    steppery.setSpeed(50000);
 
     steppery.setEnablePin(ENABLE_PIN);
 
@@ -195,13 +198,18 @@ void loop()
         {
             movement_x = movement_string.toInt();
             movement_y = movement_string.toInt();
-            stepperx.move(movement_x);
-            steppery.move(movement_y);
+
             // 1000;1234 -1000;2000
-            // movement_x = movement_string.substring(0,4).toInt();
-            // movement_y = movement_string.substring(5,9).toInt();
+            //movement_x = movement_string.substring(0,4).toInt();
+            //movement_y = movement_string.substring(5,9).toInt();
             // Serial.println("Got x: " + String(movement_x));
             // Serial.println("Got y: " + String(movement_y));
+            //TODO: implement string splitting by comma to get movement_x and movement_y with strtok()
+            stepperx.move(movement_x);
+            steppery.move(movement_y);
+      
+
+            
         }
     }
 }
