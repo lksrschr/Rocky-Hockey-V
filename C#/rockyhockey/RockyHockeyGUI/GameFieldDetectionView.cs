@@ -92,8 +92,10 @@ namespace RockyHockeyGUI
         {
             clickcoordinatelist = new ArrayList();
             sortedcoordinatelist = new ArrayList();
+            fulllist = new ArrayList();
             textBox1.Text = "";
             RectanglePicBox.Image = imgInput;
+            this.RectanglePicBox.SizeMode = PictureBoxSizeMode.StretchImage;
         }
 
         private void StartGameButton_Click(object sender, EventArgs e)
@@ -302,6 +304,11 @@ namespace RockyHockeyGUI
                 return smallestx;
             }
             return 0;
+        }
+
+        private void AbortButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
