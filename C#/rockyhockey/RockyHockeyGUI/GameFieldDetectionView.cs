@@ -92,7 +92,6 @@ namespace RockyHockeyGUI
         {
             clickcoordinatelist = new ArrayList();
             sortedcoordinatelist = new ArrayList();
-            fulllist = new ArrayList();
             textBox1.Text = "";
             RectanglePicBox.Image = imgInput;
             this.RectanglePicBox.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -117,10 +116,10 @@ namespace RockyHockeyGUI
 
         private void DetermineandSaveAxes()
         {
-            int smallestx = getMinxy(clickcoordinatelist, "X");
-            int smallesty = getMinxy(clickcoordinatelist, "Y");
-            int highestx = getMaxxy(clickcoordinatelist, "X");
-            int highesty = getMaxxy(clickcoordinatelist, "Y");
+            int smallestx = getMinxy(sortedcoordinatelist, "X");
+            int smallesty = getMinxy(sortedcoordinatelist, "Y");
+            int highestx = getMaxxy(sortedcoordinatelist, "X");
+            int highesty = getMaxxy(sortedcoordinatelist, "Y");
 
             //Informatiker-Koordinatensystem
             System.Drawing.Point smallestxsmallesty = new System.Drawing.Point(smallestx, smallesty); // Hier ist der 0 Punkt im Koordinatensystem(Oben links)
