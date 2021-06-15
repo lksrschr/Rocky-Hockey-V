@@ -26,15 +26,17 @@ namespace RockyHockeyGUI.VirtualTable
         /// </summary>
         internal float Friction;
 
-        internal TableState(Vector2 position, Vector2 batPosition)
+        internal int pointsplayer = 0;
+        internal int pointsbot = 0;
+
+
+        internal TableState(Vector2 position, Vector2 batPosition, int pointpl, int pointbot)
         {
             Position = position;
-            //BatPosition = new Vector2(300, 300);
             BatPosition = batPosition;
+            pointsplayer = pointpl;
+            pointsbot = pointbot;
         }
-
-        /*internal float batX = 300;
-        internal float batY = 300;*/
 
         internal bool IsPuckStationary
         {
