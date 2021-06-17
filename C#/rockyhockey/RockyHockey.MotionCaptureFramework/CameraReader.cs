@@ -42,16 +42,8 @@ namespace RockyHockey.MotionCaptureFramework
         {
             TimedImage image = new TimedImage();
             image.image = new Mat();
-            
+
             videoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
-            if (lastCapture.image == null)
-            {
-                Console.WriteLine("lastCapture is null");
-            }
-            else
-            {
-                Console.WriteLine("basst");
-            }
             
             
             // Image liefert nur null zurück und kann daher nicht ausgewertet werden
@@ -61,32 +53,29 @@ namespace RockyHockey.MotionCaptureFramework
 
         private void VideoCaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
-            TimedImage image = new TimedImage();
-            image.image = new Mat();
-            Mat convertedImage = new Mat();
+            
             Bitmap newFrame = (Bitmap)eventArgs.Frame.Clone();
             if (newFrame != null)
             {
-                Image<Bgr, byte> imageCV = new Image<Bgr, Byte>(newFrame);
-                puckdetectionPicture = imageCV;
-                convertedImage = imageCV.Mat;
-                image.image = convertedImage;
-                image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-                lastCapture = image;
-                if (IsReady == false)
-                {
-                    IsReady = true;
-                }
+                SaveCaptures(newFrame);
             }            
         }
 
-        private TimedImage GetScreenshot()
+        private void SaveCaptures(Bitmap newFrame)
         {
-            while (lastCapture.image == null)
+            TimedImage image = new TimedImage();
+            image.image = new Mat();
+            Mat convertedImage = new Mat();
+            Image<Bgr, byte> imageCV = new Image<Bgr, Byte>(newFrame);
+            puckdetectionPicture = imageCV;
+            convertedImage = imageCV.Mat;
+            image.image = convertedImage;
+            image.timeStamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+            lastCapture = image;
+            if (IsReady == false)
             {
-                videoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
+                IsReady = true;
             }
-            return lastCapture;
         }
 
 
