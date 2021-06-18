@@ -1,95 +1,105 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
 
+/*
+ * 11: Limit Z-Axis
+ * 10: Limit Y-Axis
+ * 9 : Limit X-Axis
+ * 8 : Stepper Enable/Disable
+ * 7 : Direction Z
+ * 6 : Direction Y
+ * 5 : Direction X
+ * 4 : StepPulse Z
+ * 3 : StepPulse Y
+ * 2 : StepPulse X
+ *
+ * 1 Motor  : X
+ * 2 Motoren: Y
+ *
+ * Y Positive = Bildschirme
+ * Y Negative= Tafel
+ *
+ * X Postive = Tür
+ * X Negative = Fenster
+ */
+
 #define ENABLE_PIN 8
-#define MOTOR_A_STEP_PIN 2
-#define MOTOR_A_DIR_PIN 5
+#define MOTOR_X_STEP_PIN 2
+#define MOTOR_X_DIR_PIN 5
+#define MOTOR_Y_STEP_PIN 3
+#define MOTOR_Y_DIR_PIN 6
 #define END_PIN_X 9
 #define END_PIN_Y 10
 
-#define MOTOR_B_STEP_PIN 4
-#define MOTOR_B_DIR_PIN 7
-
-AccelStepper steppery(1, MOTOR_A_STEP_PIN, MOTOR_A_DIR_PIN);
-AccelStepper stepperx(1, MOTOR_B_STEP_PIN, MOTOR_B_DIR_PIN);
+AccelStepper stepperx(1, MOTOR_X_STEP_PIN, MOTOR_X_DIR_PIN);
+AccelStepper steppery(1, MOTOR_Y_STEP_PIN, MOTOR_Y_DIR_PIN);
 
 //constants
-long max_x_position = 16000;
-long max_y_position = 16000;
+long max_x_position = 22800;
+long max_y_position = 15600;
 bool st_enabled = false;
 //used variables
 long movement_x = 0;
 long movement_y = 0;
 
-//calibrates position by moving to assumed null position +x till end switch toggled
+//calibrates position by moving till end switch toggled
 void calibrate_x()
 {
+    long homing=-1;
     stepperx.enableOutputs();
     Serial.println("Calibrate X");
-    stepperx.setSpeed(5000);
-
-    stepperx.move(-4000);
-    while (stepperx.distanceToGo() != 0 && digitalRead(END_PIN_X) == 1)
-    {
-        stepperx.move(-4000);
-        stepperx.runSpeedToPosition();
+    while (digitalRead(END_PIN_X)) {
+        stepperx.moveTo(homing);
+        homing--;
+        stepperx.run();
     }
-    stepperx.setCurrentPosition(0);
-    stepperx.move(7850);
-    stepperx.runSpeedToPosition();
     
+    stepperx.setCurrentPosition(0);
+    stepperx.moveTo(11400);
+    stepperx.run();
     stepperx.disableOutputs();
 }
 
 void calibrate_y()
 {
+    long homing=-1;
     steppery.enableOutputs();
     Serial.println("Calibrate Y");
-    stepperx.setSpeed(5000);
-
-    steppery.move(-max_y_position);
-    while (steppery.distanceToGo() != 0 && digitalRead(END_PIN_X) == 1)
-    {
-        steppery.runSpeedToPosition();
+    while (digitalRead(END_PIN_Y)) {
+        steppery.moveTo(homing);
+        homing--;
+        steppery.run();
     }
+    
     steppery.setCurrentPosition(0);
+    steppery.moveTo(7800);
+    steppery.run();
     steppery.disableOutputs();
 }
 
 void setup()
 {
-    Serial.println("Setup");
-
-    // TCCR1B = (TCCR1B & 0b11111000) | 0x02;
-    //TCCR1B = 0; TCCR1B |= (1 « CS10);
-
     pinMode(ENABLE_PIN, OUTPUT);
     pinMode(END_PIN_X, INPUT_PULLUP);
     pinMode(END_PIN_Y, INPUT_PULLUP);
+
     stepperx.setPinsInverted(false, false, true);
     steppery.setPinsInverted(false, false, true);
+    
+    stepperx.setMaxSpeed(9000);
+    stepperx.setAcceleration(2500000000);
+    stepperx.setSpeed(9000);
 
-    // stepperx.setMinPulseWidth(60);
-    stepperx.setMaxSpeed(50000);
-    stepperx.setAcceleration(25000000);
-    stepperx.setSpeed(50000);
+    steppery.setMaxSpeed(9000);
+    steppery.setAcceleration(2500000000);
+    steppery.setSpeed(9000);
 
     stepperx.setEnablePin(ENABLE_PIN);
-
-    // steppery.setMinPulseWidth(60);
-    steppery.setMaxSpeed(50000);
-    steppery.setAcceleration(25000000);
-    steppery.setSpeed(50000);
-
     steppery.setEnablePin(ENABLE_PIN);
 
     Serial.begin(9600);
-
-    // stepperx.enableOutputs();
-    // steppery.enableOutputs();
-    // calibrate_x();
-    // calibrate_y();
 }
+
 
 bool moveAllowedx()
 {
@@ -145,6 +155,16 @@ bool moveAllowedy()
 
 void loop()
 {
+    if (digitalRead(END_PIN_X) != 1) {
+        Serial.println("END_PIN_X: ");
+        Serial.println(digitalRead(END_PIN_X));
+    }
+
+    if (digitalRead(END_PIN_Y) != 1) {
+        Serial.println("END_PIN_Y: ");
+        Serial.println(digitalRead(END_PIN_Y));
+    }
+
     if ((stepperx.distanceToGo() != 0) || (steppery.distanceToGo() != 0) && !st_enabled)
     {
         Serial.println("Enable steppers");
@@ -194,22 +214,27 @@ void loop()
             calibrate_x();
             calibrate_y();
         }
+        else if ((movement_string == "xcalibrate\n") || (movement_string == "xcalibrate"))
+        {
+            Serial.println("Calibrate X only triggered");
+            calibrate_x();
+        }
+        else if ((movement_string == "ycalibrate\n") || (movement_string == "ycalibrate"))
+        {
+            Serial.println("Calibrate Y only triggered");
+            calibrate_y();
+        }
         else
         {
-            movement_x = movement_string.toInt();
-            movement_y = movement_string.toInt();
-
-            // 1000;1234 -1000;2000
-            //movement_x = movement_string.substring(0,4).toInt();
-            //movement_y = movement_string.substring(5,9).toInt();
-            // Serial.println("Got x: " + String(movement_x));
-            // Serial.println("Got y: " + String(movement_y));
-            //TODO: implement string splitting by comma to get movement_x and movement_y with strtok()
+            int delimiterIndex = movement_string.indexOf(',');
+            String XValue = movement_string.substring(0, delimiterIndex);
+            String YValue = movement_string.substring(delimiterIndex + 1);
+            movement_x = XValue.toInt();
+            movement_y = YValue.toInt();
+            Serial.println("stepperx.move: " + String(movement_x));
+            Serial.println("steppery.move: " + String(movement_y));
             stepperx.move(movement_x);
             steppery.move(movement_y);
-      
-
-            
         }
     }
 }
