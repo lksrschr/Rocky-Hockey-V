@@ -73,22 +73,6 @@ namespace RockyHockeyGUI.VirtualTable
             MovementController.Instance.OnMove -= AxisOnMove;
             Table.Stop();
         }
-        
-        private void PanelChangeScore(object sender, PaintEventArgs e)
-        {
-            // Paint puck and bat onto the playfield
-            var player = Vector2.Zero;
-            var bot = Vector2.Zero;
-
-            Table.AccessState(state =>
-            {
-                labelScorePlayer.Text = System.Convert.ToString(state.pointsplayer);
-                labelScorePlayer.Refresh();
-                labelScoreBot.Text  = System.Convert.ToString(state.pointsbot);
-                labelScoreBot.Refresh();
-            });
-
-        }
 
         private void PanelPaintGoal(object sender, PaintEventArgs e)
         {
@@ -104,12 +88,19 @@ namespace RockyHockeyGUI.VirtualTable
 
         private void PanelPaint(object sender, PaintEventArgs e)
         {
+            
+
             // Paint puck and bat onto the playfield
             var puckPos = Vector2.Zero;
             var batPos = Vector2.Zero;
 
             Table.AccessState(state =>
             {
+                if(state.GoalHappened==true)
+                {
+                    UpdateScore();
+                }
+                
                 puckPos = state.Position;
                 batPos = state.BatPosition;
             });
@@ -265,6 +256,20 @@ namespace RockyHockeyGUI.VirtualTable
 
         }
 
+        private void UpdateScore()
+        {
+            var player = Vector2.Zero;
+            var bot = Vector2.Zero;
+            Table.AccessState(state =>
+            {
+                score.Text = System.Convert.ToString(state.pointsplayer);
+                score.Refresh();
+                scoreB.Text  = System.Convert.ToString(state.pointsbot);
+                scoreB.Refresh();                  
+            });
+
+        }
+
         private void AxisOnMove(double x, double y)
         {
             Invoke(new Action(() =>
@@ -277,6 +282,7 @@ namespace RockyHockeyGUI.VirtualTable
         // TODO NEXT: Puck is getting stuck inside the bat try to fix next time
         private void MoveBatOnMouseMove(object sender, MouseEventArgs e)
         {
+            UpdateScore();
             Table.AccessState(state =>
             {
                 var batPosition = state.BatPosition;

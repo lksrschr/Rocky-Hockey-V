@@ -28,7 +28,7 @@ namespace RockyHockeyGUI.VirtualTable
 
         internal int pointsplayer = 0;
         internal int pointsbot = 0;
-
+        internal bool goal = false;
 
         internal TableState(Vector2 position, Vector2 batPosition, int pointpl, int pointbot)
         {
@@ -36,6 +36,18 @@ namespace RockyHockeyGUI.VirtualTable
             BatPosition = batPosition;
             pointsplayer = pointpl;
             pointsbot = pointbot;
+        }
+
+        internal bool GoalHappened
+        {
+            get => goal == true;
+            set
+            {
+                if (value)
+                {
+                    goal = true;
+                }
+            }
         }
 
         internal bool IsPuckStationary

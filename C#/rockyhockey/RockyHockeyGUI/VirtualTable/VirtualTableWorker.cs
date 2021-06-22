@@ -142,11 +142,7 @@ namespace RockyHockeyGUI.VirtualTable
             var batStationary = tableState.IsBatStationary;
             var playerScore = tableState.pointsplayer;
             var botScore = tableState.pointsbot;
-
-            if ((position.X<=puckRadius*2) && (position.Y<283f)&&(position.Y>169f) )
-            {
-                botScore++;
-            }
+  
 
             // Check if Bat is moving
             if(batVelocity.Length()<0.3f)
@@ -174,9 +170,9 @@ namespace RockyHockeyGUI.VirtualTable
                 } 
                 //position += -velocity; 
             }
-            //bool isdrin = true;
+
             position = ClampBat(position);
-            // position -= velocity;
+
             if (velocity != Vector2.Zero)
             {
                 // Try to get puck unstuck if it was placed inside a wall
@@ -221,12 +217,28 @@ namespace RockyHockeyGUI.VirtualTable
                 }
                 
             }
+            // Check if the puck hit the player goal
+            if ((position.X<=puckRadius*2) && (position.Y<283f)&&(position.Y>169f) )
+            {
+                botScore++;
+                position = new Vector2(802 * 0.75f, 452 * 0.5f);
+                velocity = new Vector2(0f,0f);
+                tableState.GoalHappened = true;
+            }
+            if((position.X>=fieldWidth-puckRadius*2f) && (position.Y<283f)&&(position.Y>169f))
+                {
+                playerScore++;
+                position = new Vector2(802 * 0.75f, 452 * 0.5f);
+                velocity = new Vector2(0f,0f);
+                tableState.GoalHappened = true;
+            }
             // Update the speed and position of puck and position of bat 
             tableState.Velocity = velocity;
             tableState.Position = position;
             tableState.BatPosition = batPos;
             tableState.pointsplayer = playerScore;
             tableState.pointsbot = botScore;
+            tableState.GoalHappened = false;
         }
         /// <summary>
         /// Used by path prediction.

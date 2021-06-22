@@ -293,8 +293,7 @@
             this.scoreB.Name = "ScoreB";
             this.scoreB.Size = new System.Drawing.Size(70, 10);
             this.scoreB.TabIndex = 7;
-            //this.scoreB.Text = "0";
-            this.scoreB.Text += new System.Windows.Forms.PaintEventHandler(this.PanelChangeScore);
+            this.scoreB.Text = "0";
             this.scoreB.Font = new System.Drawing.Font("Arial", 60,System.Drawing.FontStyle.Bold);
             // 
             // VirtualTableView
