@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 /*
  * 11: Limit Z-Axis
@@ -42,6 +45,34 @@ bool st_enabled = false;
 long movement_x = 0;
 long movement_y = 0;
 
+void random_movement() {
+  int lowerx = -20000;
+  int lowery = -15000;
+  int rand_x;
+  int rand_y;
+  do {
+      rand_x = random(lowerx, max_x_position);
+      rand_x = (rand_x+500)/1000;
+      rand_x = rand_x*1000;
+  } while (((rand_x + stepperx.currentPosition()) > max_x_position) ||
+  ((rand_x + stepperx.currentPosition()) < 1000) ||
+  (rand_x == 0));
+
+  do {
+      rand_y = random(lowery, max_y_position);
+      rand_y = (rand_y+500)/1000;
+      rand_y = rand_y*1000;
+  } while (((rand_y + steppery.currentPosition()) > max_y_position) ||
+  ((rand_y + steppery.currentPosition()) < 1000) ||
+  (rand_y == 0));
+
+  Serial.println("Random: ");
+  Serial.println(rand_x);
+  Serial.println(rand_y);
+  stepperx.move(rand_x);
+  steppery.move(rand_y);
+}
+
 //calibrates position by moving till end switch toggled
 void calibrate_x()
 {
@@ -53,7 +84,7 @@ void calibrate_x()
         homing--;
         stepperx.run();
     }
-    
+
     stepperx.setCurrentPosition(0);
     stepperx.moveTo(11400);
     stepperx.run();
@@ -70,7 +101,7 @@ void calibrate_y()
         homing--;
         steppery.run();
     }
-    
+
     steppery.setCurrentPosition(0);
     steppery.moveTo(7800);
     steppery.run();
@@ -85,7 +116,7 @@ void setup()
 
     stepperx.setPinsInverted(false, false, true);
     steppery.setPinsInverted(false, false, true);
-    
+
     stepperx.setMaxSpeed(9000);
     stepperx.setAcceleration(2500000000);
     stepperx.setSpeed(9000);
@@ -113,12 +144,14 @@ bool moveAllowedx()
         {
             stepperx.stop();
             stepperx.setCurrentPosition(0);
+            Serial.println("X Movement not allowed");
             return false;
         }
     }
     else if (stepperx.targetPosition() > max_x_position)
     {
         stepperx.stop();
+        Serial.println("X Movement not allowed");
         return false;
     }
     else
@@ -139,12 +172,14 @@ bool moveAllowedy()
         {
             steppery.stop();
             steppery.setCurrentPosition(0);
+            Serial.println("Y Movement not allowed");
             return false;
         }
     }
     else if (steppery.targetPosition() > max_y_position)
     {
         steppery.stop();
+        Serial.println("Y Movement not allowed");
         return false;
     }
     else
@@ -223,6 +258,11 @@ void loop()
         {
             Serial.println("Calibrate Y only triggered");
             calibrate_y();
+        }
+        else if ((movement_string == "random\n") || (movement_string == "random"))
+        {
+            Serial.println("Random movement");
+            random_movement();
         }
         else
         {
