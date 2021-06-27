@@ -27,7 +27,8 @@ namespace RockyHockeyGUI.VirtualTable
         private const int FieldHeight = 450; //       900 mm
         private const float BatDiameter = 47.5f; //    95 mm
         private const float BatRadius = 23.75f; //   47.5 mm
-
+        private const int goalWidth = 24;
+        private const int goalheight = 114;
         // Not quite sure about the puck size - forgot to measure... Standardized puck sizes are 63 and 50 mm.
         // Putting 63 mm for now but I have a feeling it might be wrong.
         // Todo: Use the correct puck size here.
@@ -72,30 +73,51 @@ namespace RockyHockeyGUI.VirtualTable
             MovementController.Instance.OnMove -= AxisOnMove;
             Table.Stop();
         }
-        
+
+        private void PanelPaintGoal(object sender, PaintEventArgs e)
+        {
+            // Paint the goals onto the playfield
+            Pen blackPen = new Pen(Color.Red, 5);
+            Rectangle leftrect = new Rectangle(-24,169,goalWidth,goalheight);
+            Rectangle rightrect = new Rectangle(824,169,goalWidth,goalheight);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.DrawRectangle(blackPen, leftrect);
+            e.Graphics.DrawRectangle(blackPen, rightrect);
+        }
+
         private void PanelPaint(object sender, PaintEventArgs e)
         {
+
+            // Paint puck and bat onto the playfield
             var puckPos = Vector2.Zero;
             var batPos = Vector2.Zero;
+            var robPos = Vector2.Zero;
 
             Table.AccessState(state =>
             {
+                if(state.GoalHappened==true)
+                {
+                    UpdateScore();
+                }
+                
                 puckPos = state.Position;
                 batPos = state.BatPosition;
+                robPos = state.RobotPosition;
             });
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.FillEllipse(new SolidBrush(Color.DarkGreen), puckPos.X - PuckRadius, puckPos.Y - PuckRadius,
+            e.Graphics.FillEllipse(new SolidBrush(Color.PaleVioletRed), puckPos.X - PuckRadius, puckPos.Y - PuckRadius,
                 PuckDiameter, PuckDiameter);
-            e.Graphics.FillEllipse(new SolidBrush(Color.MediumBlue), batPos.X - BatRadius, batPos.Y - BatRadius,
+            e.Graphics.FillEllipse(new SolidBrush(Color.LimeGreen), batPos.X - BatRadius, batPos.Y - BatRadius,
                 BatDiameter, BatDiameter);
-
+            e.Graphics.FillEllipse(new SolidBrush(Color.DarkBlue), robPos.X - BatRadius, robPos.Y - BatRadius,
+                BatDiameter, BatDiameter);
+            // Paint puck and bat onto the playfield
             //Draw the velocity vector of the puck
             if (hasVelocityLine)
             {
                 e.Graphics.DrawLine(new Pen(Color.Red, 3), puckPos.X, puckPos.Y, mouseHeldX, mouseHeldY);
             }
-
         }
 
         private void PanelMouseDown(object sender, MouseEventArgs e)
@@ -106,7 +128,7 @@ namespace RockyHockeyGUI.VirtualTable
             {
                 isStationary = state.IsPuckStationary;
 
-                if ((isStationary)&&(moveBatMode.Enabled==false)) // Move puck iif MoveBatMode isn't active
+                if ((isStationary)&&(moveBatMode.Enabled==false)) // Move puck if MoveBatMode isn't active
                 {
                     state.Position = new Vector2(e.X, e.Y);
                 }
@@ -134,8 +156,8 @@ namespace RockyHockeyGUI.VirtualTable
             // Move bat when MoveBatMode is active
             MoveBatOnMouseMove(sender, e);
             // Get current mouse location
-            currentPos.X = e.Location.X;
-            currentPos.Y = e.Location.Y;
+            currentPos.X = e.Location.X*5f;
+            currentPos.Y = e.Location.Y*5f;
             if (isMouseHeld)
             {
                 MoveBatOnMouseMove(sender, e);
@@ -168,7 +190,7 @@ namespace RockyHockeyGUI.VirtualTable
                 {
                     var position = state.Position;
                     state.Velocity =
-                        new Vector2(mouseHeldX - position.X, mouseHeldY - position.Y) / 25; // 0.25 * ticks/s
+                        new Vector2(mouseHeldX - position.X, mouseHeldY - position.Y)/25; // 0.25 * ticks/s
                 });
 
                 hasVelocityLine = false;
@@ -204,8 +226,8 @@ namespace RockyHockeyGUI.VirtualTable
         }
 
         private void TrackBarScroll(object sender, EventArgs e)
-        {
-            Table.AccessState(state => state.Friction = trackBar.Value * 0.001f);
+        { // initial value 0.001f
+            Table.AccessState(state => state.Friction = trackBar.Value * 0.00075f); // second value 0.00075f
         }
 
         private void TimerTick(object sender, EventArgs e)
@@ -235,6 +257,20 @@ namespace RockyHockeyGUI.VirtualTable
 
         }
 
+        private void UpdateScore()
+        {
+            var player = Vector2.Zero;
+            var bot = Vector2.Zero;
+            Table.AccessState(state =>
+            {
+                score.Text = System.Convert.ToString(state.pointsplayer);
+                score.Refresh();
+                scoreB.Text  = System.Convert.ToString(state.pointsbot);
+                scoreB.Refresh();                  
+            });
+
+        }
+
         private void AxisOnMove(double x, double y)
         {
             Invoke(new Action(() =>
@@ -247,6 +283,7 @@ namespace RockyHockeyGUI.VirtualTable
         // TODO NEXT: Puck is getting stuck inside the bat try to fix next time
         private void MoveBatOnMouseMove(object sender, MouseEventArgs e)
         {
+            UpdateScore();
             Table.AccessState(state =>
             {
                 var batPosition = state.BatPosition;
@@ -254,16 +291,16 @@ namespace RockyHockeyGUI.VirtualTable
                 if( (moveBatMode.Enabled==true)&&(moveBat==true) )
                 {
                     // set the velocity of the bat upon movement of the mouse
-                    state.VelocityBat = new Vector2(currentPos.X - e.Location.X, currentPos.Y - e.Location.Y ) / 25f;
+                    state.VelocityBat = new Vector2(currentPos.X - e.Location.X*4.99f, currentPos.Y - e.Location.Y*4.99f )/10f;
 
                     if ( ( (Math.Abs(position.X - batPosition.X) >= 0f)&&(Math.Abs(position.X - batPosition.X) <= 39.5f) ) && 
                     ( (Math.Abs(position.Y - batPosition.Y) >= 0f)&&(Math.Abs(position.Y - batPosition.Y) <= 39.5f) ) ) 
                     {
                         // EXPERIMENTAL
-                        if((!state.IsBatStationary)&&(state.VelocityBat.Length()>0.1f))
+                        if((!state.IsBatStationary)&&(state.VelocityBat.Length()>0.2f))
                         {
-                            state.Velocity.Y +=  (state.VelocityBat.Y)*25;
-                            state.Velocity.X +=  (state.VelocityBat.X)*25;
+                            state.Velocity.Y +=  (state.VelocityBat.Y);
+                            state.Velocity.X +=  (state.VelocityBat.X);
                         }
                         else if(state.VelocityBat.Length()<=0.1f)
                         {

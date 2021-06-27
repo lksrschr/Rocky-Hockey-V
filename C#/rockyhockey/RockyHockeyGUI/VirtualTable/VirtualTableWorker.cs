@@ -9,7 +9,7 @@ using RockyHockey.MotionCaptureFramework;
 using RockyHockey.MovementFramework;
 
 namespace RockyHockeyGUI.VirtualTable
-{
+{  
     /// <summary>
     /// This class is doing the actual "simulation" work for the virtual table.
     /// Since GDI rendering with WinForms is limited to 30 fps, the simulation is running on its own thread.
@@ -34,8 +34,9 @@ namespace RockyHockeyGUI.VirtualTable
             this.fieldHeight = fieldHeight;
             this.puckRadius = puckRadius;
             this.batRadius = batRadius;
-            tableState = new TableState(new Vector2(fieldWidth * 0.75f, fieldHeight * 0.5f), new Vector2(fieldWidth * 0.25f, fieldHeight * 0.5f));
+            tableState = new TableState(new Vector2(fieldWidth/2f,fieldHeight/2f),new Vector2(fieldWidth * 0.25f, fieldHeight * 0.5f), new Vector2(fieldWidth * 0.75f, fieldHeight * 0.5f),0,0);
         }
+
 
         /// <summary>
         /// Allows safe access to the table state.
@@ -51,6 +52,9 @@ namespace RockyHockeyGUI.VirtualTable
                 action.Invoke(tableState);
             }
         }
+
+        
+
 
         /// <summary>
         /// A convenience method to access the table state similar to <see cref="AccessState"/>.
@@ -134,23 +138,34 @@ namespace RockyHockeyGUI.VirtualTable
         /// </summary>
         private void Tick()
         {
-            
+            // Set the pos and vel values
             var velocity = tableState.Velocity;
             var batVelocity = tableState.VelocityBat;
+            var robVelocity = tableState.VelocityRobot;
+
             var position = tableState.Position;
             var batPos = tableState.BatPosition;
+            var robPos = tableState.RobotPosition;
+            
+            var robStationary = tableState.IsRobotStationary;
             var batStationary = tableState.IsBatStationary;
+
+            var playerScore = tableState.pointsplayer;
+            var botScore = tableState.pointsbot;
+
             // Check if Bat is moving
-            if(batVelocity.Length()<0.1f)
+            if(batVelocity.Length()<0.3f)
             {
                 batStationary = true;
+                tableState.IsBatStationary =  true;
             }
-
+            position = ClampBat(position);
             // Bounce off Batposition
             // Check if position of puck is within the range of ]0; 39.5] to simulate a collision
             if ( ( (Math.Abs(position.X - batPos.X) >= 0f)&&(Math.Abs(position.X - batPos.X) <= 39.5f) ) && 
             ( (Math.Abs(position.Y - batPos.Y) >= 0f)&&(Math.Abs(position.Y - batPos.Y) <= 39.5f) ) )
             {
+                tableState.Position = position;
                 position += -velocity;
                 if(!batStationary)
                 {
@@ -162,12 +177,34 @@ namespace RockyHockeyGUI.VirtualTable
                     velocity.Y *=  -1;
                     velocity.X *=  -1;
                 } 
-                position += -velocity; 
+                //position += -velocity; 
             }
-            // position -= velocity;
+
+            if ( ( (Math.Abs(position.X - robPos.X) >= 0f)&&(Math.Abs(position.X - robPos.X) <= 39.5f) ) && 
+            ( (Math.Abs(position.Y - robPos.Y) >= 0f)&&(Math.Abs(position.Y - robPos.Y) <= 39.5f) ) )
+            {
+                tableState.Position = position;
+                position += -velocity;
+                if(!robStationary)
+                {
+                    velocity.Y *=  -(robVelocity.Y);
+                    velocity.X *=  -(robVelocity.X);
+                }
+                else if(robStationary)
+                {
+                    velocity.Y *=  -1;
+                    velocity.X *=  -1;
+                } 
+                //position += -velocity; 
+            }
+           
+            //controller.MoveStrategy()
+            position = ClampBat(position);
+
             if (velocity != Vector2.Zero)
             {
                 // Try to get puck unstuck if it was placed inside a wall
+                
                 position.X = Clamp(position.X, puckRadius, fieldWidth - puckRadius);
                 position.Y = Clamp(position.Y, puckRadius, fieldHeight - puckRadius);
                 
@@ -208,10 +245,30 @@ namespace RockyHockeyGUI.VirtualTable
                 }
                 
             }
+            // Check if the puck hit any goal
+            // if goal happens change position of the puck to the default position
+            // bool goalhappened implemented to ensure proper program flow but not needed currently
+            if ((position.X<=puckRadius*2) && (position.Y<283f)&&(position.Y>169f) )
+            {
+                botScore++;
+                position = new Vector2(fieldWidth / 2f, fieldHeight /2f);
+                velocity = new Vector2(0f,0f);
+                tableState.GoalHappened = true;
+            }
+            if((position.X>=fieldWidth-puckRadius*2f) && (position.Y<283f)&&(position.Y>169f))
+                {
+                playerScore++;
+                position = new Vector2(fieldWidth / 2f, fieldHeight /2f);
+                velocity = new Vector2(0f,0f);
+                tableState.GoalHappened = true;
+            }
             // Update the speed and position of puck and position of bat 
             tableState.Velocity = velocity;
             tableState.Position = position;
             tableState.BatPosition = batPos;
+            tableState.pointsplayer = playerScore;
+            tableState.pointsbot = botScore;
+            tableState.GoalHappened = false;
         }
         /// <summary>
         /// Used by path prediction.
@@ -235,6 +292,33 @@ namespace RockyHockeyGUI.VirtualTable
 
             return positions;
         }
+        // TODO not working perfectly
+        public Vector2 ClampBat(Vector2 value)
+        {
+            float currentX = tableState.Position.X+puckRadius;
+            float currentY = tableState.Position.Y+puckRadius;
+            float burrentX = tableState.BatPosition.X+batRadius;
+            float burrentY = tableState.BatPosition.Y+batRadius;
+
+            if( (Math.Abs(currentX-burrentX)<12f) && (Math.Abs(currentY-burrentY)<12f) )
+            {
+                if(Math.Abs(currentY-burrentY)<12f)
+                {
+                    value.Y = tableState.Position.Y+23.75f;
+                    return value;
+                }
+                else if(Math.Abs(currentX-burrentX)<12f)
+                {
+                    value.X = tableState.Position.X+23.75f;
+                    return value;
+                }
+                value.X = tableState.Position.X+23.75f;
+                value.Y = tableState.Position.Y+23.75f;
+                return value;
+            } 
+            value = tableState.Position;
+            return value;  
+        }
 
         /// <summary>
         /// Also used by path prediction.
@@ -255,6 +339,8 @@ namespace RockyHockeyGUI.VirtualTable
 
         public override void StopMotionCapturing() { }
 
+        // TODO Clamp not working perfectly
+
         private static float Clamp(float value, float min, float max)
         {
             if (value < min)
@@ -267,7 +353,7 @@ namespace RockyHockeyGUI.VirtualTable
             }
 
             return value;
-        }
+        }        
 
     }
 }
