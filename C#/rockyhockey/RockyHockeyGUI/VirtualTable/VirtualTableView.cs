@@ -78,9 +78,8 @@ namespace RockyHockeyGUI.VirtualTable
         {
             // Paint the goals onto the playfield
             Pen blackPen = new Pen(Color.Red, 5);
-            //                                 X, Y ,     L   ,   B
             Rectangle leftrect = new Rectangle(-24,169,goalWidth,goalheight);
-            Rectangle rightrect = new Rectangle(799,169,goalWidth,goalheight);
+            Rectangle rightrect = new Rectangle(824,169,goalWidth,goalheight);
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.DrawRectangle(blackPen, leftrect);
             e.Graphics.DrawRectangle(blackPen, rightrect);
@@ -88,11 +87,11 @@ namespace RockyHockeyGUI.VirtualTable
 
         private void PanelPaint(object sender, PaintEventArgs e)
         {
-            
 
             // Paint puck and bat onto the playfield
             var puckPos = Vector2.Zero;
             var batPos = Vector2.Zero;
+            var robPos = Vector2.Zero;
 
             Table.AccessState(state =>
             {
@@ -103,12 +102,15 @@ namespace RockyHockeyGUI.VirtualTable
                 
                 puckPos = state.Position;
                 batPos = state.BatPosition;
+                robPos = state.RobotPosition;
             });
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.FillEllipse(new SolidBrush(Color.DarkGreen), puckPos.X - PuckRadius, puckPos.Y - PuckRadius,
+            e.Graphics.FillEllipse(new SolidBrush(Color.PaleVioletRed), puckPos.X - PuckRadius, puckPos.Y - PuckRadius,
                 PuckDiameter, PuckDiameter);
-            e.Graphics.FillEllipse(new SolidBrush(Color.MediumBlue), batPos.X - BatRadius, batPos.Y - BatRadius,
+            e.Graphics.FillEllipse(new SolidBrush(Color.LimeGreen), batPos.X - BatRadius, batPos.Y - BatRadius,
+                BatDiameter, BatDiameter);
+            e.Graphics.FillEllipse(new SolidBrush(Color.DarkBlue), robPos.X - BatRadius, robPos.Y - BatRadius,
                 BatDiameter, BatDiameter);
             // Paint puck and bat onto the playfield
             //Draw the velocity vector of the puck
@@ -116,7 +118,6 @@ namespace RockyHockeyGUI.VirtualTable
             {
                 e.Graphics.DrawLine(new Pen(Color.Red, 3), puckPos.X, puckPos.Y, mouseHeldX, mouseHeldY);
             }
-
         }
 
         private void PanelMouseDown(object sender, MouseEventArgs e)
@@ -225,8 +226,8 @@ namespace RockyHockeyGUI.VirtualTable
         }
 
         private void TrackBarScroll(object sender, EventArgs e)
-        { // ursprünglicher wert 0.001f
-            Table.AccessState(state => state.Friction = trackBar.Value * 0.00075f);
+        { // initial value 0.001f
+            Table.AccessState(state => state.Friction = trackBar.Value * 0.00075f); // second value 0.00075f
         }
 
         private void TimerTick(object sender, EventArgs e)
