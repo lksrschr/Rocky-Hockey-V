@@ -66,9 +66,6 @@ void random_movement() {
   ((rand_y + steppery.currentPosition()) < 1000) ||
   (rand_y == 0));
 
-  Serial.println("Random: ");
-  Serial.println(rand_x);
-  Serial.println(rand_y);
   stepperx.move(rand_x);
   steppery.move(rand_y);
 }
@@ -78,7 +75,6 @@ void calibrate_x()
 {
     long homing=-1;
     stepperx.enableOutputs();
-    Serial.println("Calibrate X");
     while (digitalRead(END_PIN_X)) {
         stepperx.moveTo(homing);
         homing--;
@@ -95,7 +91,6 @@ void calibrate_y()
 {
     long homing=-1;
     steppery.enableOutputs();
-    Serial.println("Calibrate Y");
     while (digitalRead(END_PIN_Y)) {
         steppery.moveTo(homing);
         homing--;
@@ -144,14 +139,12 @@ bool moveAllowedx()
         {
             stepperx.stop();
             stepperx.setCurrentPosition(0);
-            Serial.println("X Movement not allowed");
             return false;
         }
     }
     else if (stepperx.targetPosition() > max_x_position)
     {
         stepperx.stop();
-        Serial.println("X Movement not allowed");
         return false;
     }
     else
@@ -172,14 +165,12 @@ bool moveAllowedy()
         {
             steppery.stop();
             steppery.setCurrentPosition(0);
-            Serial.println("Y Movement not allowed");
             return false;
         }
     }
     else if (steppery.targetPosition() > max_y_position)
     {
         steppery.stop();
-        Serial.println("Y Movement not allowed");
         return false;
     }
     else
@@ -190,19 +181,8 @@ bool moveAllowedy()
 
 void loop()
 {
-    if (digitalRead(END_PIN_X) != 1) {
-        Serial.println("END_PIN_X: ");
-        Serial.println(digitalRead(END_PIN_X));
-    }
-
-    if (digitalRead(END_PIN_Y) != 1) {
-        Serial.println("END_PIN_Y: ");
-        Serial.println(digitalRead(END_PIN_Y));
-    }
-
     if ((stepperx.distanceToGo() != 0) || (steppery.distanceToGo() != 0) && !st_enabled)
     {
-        Serial.println("Enable steppers");
         st_enabled = true;
         stepperx.enableOutputs();
         steppery.enableOutputs();
@@ -228,7 +208,6 @@ void loop()
 
     if (stepperx.distanceToGo() == 0 && steppery.distanceToGo() == 0 && st_enabled)
     {
-        Serial.println("Disable steppers");
         st_enabled = false;
 
         stepperx.disableOutputs();
@@ -238,30 +217,32 @@ void loop()
     if (Serial.available() > 0)
     {
         String movement_string = Serial.readStringUntil('\n');
-        if ((movement_string == "position\n") || (movement_string == "position"))
+        if ((movement_string == "ready\n") || (movement_string == "ready"))
         {
-            Serial.print("{\"x_position\": \"" + String(stepperx.currentPosition()) + "\",");
-            Serial.println("\"y_position\": \"" + String(steppery.currentPosition()) + "\"}");
+          if (st_enabled == 0)
+            Serial.print("True");
+          else
+            Serial.print("False");
+        }
+        else if ((movement_string == "position\n") || (movement_string == "position"))
+        {
+            Serial.println(String(stepperx.currentPosition()) + "," + String(steppery.currentPosition()));
         }
         else if ((movement_string == "calibrate\n") || (movement_string == "calibrate"))
         {
-            Serial.println("Calibrate triggered");
             calibrate_x();
             calibrate_y();
         }
         else if ((movement_string == "xcalibrate\n") || (movement_string == "xcalibrate"))
         {
-            Serial.println("Calibrate X only triggered");
             calibrate_x();
         }
         else if ((movement_string == "ycalibrate\n") || (movement_string == "ycalibrate"))
         {
-            Serial.println("Calibrate Y only triggered");
             calibrate_y();
         }
         else if ((movement_string == "random\n") || (movement_string == "random"))
         {
-            Serial.println("Random movement");
             random_movement();
         }
         else
@@ -269,12 +250,11 @@ void loop()
             int delimiterIndex = movement_string.indexOf(',');
             String XValue = movement_string.substring(0, delimiterIndex);
             String YValue = movement_string.substring(delimiterIndex + 1);
+            Serial.println(YValue);
             movement_x = XValue.toInt();
             movement_y = YValue.toInt();
-            Serial.println("stepperx.move: " + String(movement_x));
-            Serial.println("steppery.move: " + String(movement_y));
-            stepperx.move(movement_x);
-            steppery.move(movement_y);
+            stepperx.moveTo(movement_x);
+            steppery.moveTo(movement_y);
         }
     }
 }
